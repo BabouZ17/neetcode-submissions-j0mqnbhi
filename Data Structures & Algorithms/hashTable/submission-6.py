@@ -1,0 +1,86 @@
+class HashTable:
+    
+    def __init__(self, capacity: int):
+        if capacity < 1:
+            raise ValueError("capacity is too low")
+        self.capacity = capacity
+        self.size = 0
+        self.buckets = [[] for _ in range(self.capacity)]
+
+    def hash_function(self, key: int) -> int:
+        return hash(key) % self.capacity
+    
+    def insert(self, key: int, value: int) -> None:
+        hash_key = self.hash_function(key)
+        bucket = self.buckets[hash_key]
+
+        found_key = False
+        for index, item in enumerate(bucket):
+            item_key, item_val = item
+
+            if key == item_key:
+                found_key = True
+                break
+
+        if found_key:
+            bucket[index] = (key, value)
+        else:
+            bucket.append((key, value))
+
+        self.size += 1        
+        if self.getSize() / self.getCapacity() >= 0.5:
+            self.resize()
+
+    def get(self, key: int) -> int:
+        hash_key = self.hash_function(key)
+        bucket = self.buckets[hash_key]
+
+        found_key = False
+        for index, item in enumerate(bucket):
+            item_key, item_val = item
+
+            if key == item_key:
+                found_key = True
+                break
+        
+        if found_key:
+            return bucket[index][1]
+        else:
+            return -1
+
+    def remove(self, key: int) -> bool:
+        hash_key = self.hash_function(key)
+        bucket = self.buckets[hash_key]
+
+        found_key = False
+        for index, item in enumerate(bucket):
+            item_key, item_val = item
+
+            if key == item_key:
+                found_key = True
+                break
+        
+        if found_key:
+            bucket.pop(index)
+            self.size -= 1
+            return True
+        else:
+            return False
+
+    def getSize(self) -> int:
+        return self.size
+
+    def getCapacity(self) -> int:
+        return self.capacity
+
+    def resize(self) -> None:
+        self.capacity *= 2
+        self.size = 0
+        
+        old_buckets = self.buckets[:]
+
+        self.buckets = [[] for _ in range(self.capacity)]
+
+        for bucket in old_buckets:
+            for item in bucket:
+                self.insert(item[0], item[1])
